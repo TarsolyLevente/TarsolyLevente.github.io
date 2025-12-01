@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en" class=""> <!-- JS will manage language and dark mode -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Levente Tarsoly</title> <!-- Base Title -->
+
+    <!-- !! START: Anti-Flicker Script !! -->
+    <script>
+        // Immediately check localStorage and apply 'dark' class if needed
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+    <!-- !! END: Anti-Flicker Script !! -->
+
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Optional: Load Inter font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+            // Define custom colors based on CV - TEAL/GREEN
+            colors: {
+              'cv-accent': { light: '#0f766e', dark: '#5eead4' }, // teal-700 / teal-300
+              'cv-accent-bg': { light: '#f0fdfa', dark: '#134e4a' }, // teal-50 / teal-900
+              'cv-accent-text': { light: '#115e59', dark: '#99f6e4' }, // teal-800 / teal-200
+               'cv-bg': { light: '#f9fafb', dark: '#1f2937' }, // gray-50 / gray-800
+               'cv-card-bg': { light: '#ffffff', dark: '#374151' }, // white / gray-700
+               'cv-text': { light: '#374151', dark: '#d1d5db' }, // gray-700 / gray-300
+               'cv-heading': { light: '#111827', dark: '#f9fafb' }, // gray-900 / gray-50
+                'cv-subtle-text': { light: '#6b7280', dark: '#9ca3af' }, // gray-500 / gray-400
+                 'cv-border': { light: '#e5e7eb', dark: '#4b5563' } // gray-200 / gray-600
+            },
+          }
+        }
+      }
+    </script>
+    <style>
+        body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+        /* Active nav link styling - Use custom accent colors */
+        .nav-link.active {
+            font-weight: 600; color: #0f766e; /* cv-accent-light */
+            border-bottom: 2px solid #0f766e;
+        }
+        .dark .nav-link.active {
+            color: #5eead4; /* cv-accent-dark */
+            border-bottom-color: #5eead4;
+        }
+        /* Ensure non-active links have no underline */
+        .nav-link { text-decoration: none !important; }
+        .nav-link:hover { text-decoration: none !important; }
+
+        /* Language content visibility - Reverted to display none/block */
+        [data-lang-content="hu"] { display: none; }
+        html[lang="hu"] [data-lang-content="en"] { display: none; }
+        html[lang="hu"] [data-lang-content="hu"] { display: block; } /* Use block for default visibility */
+        /* Handle potential inline elements if needed */
+        html[lang="hu"] span[data-lang-content="hu"] { display: inline; }
+        html[lang="hu"] a[data-lang-content="hu"] { display: inline; }
+
+        html[lang="en"] [data-lang-content="hu"] { display: none; }
+        html[lang="en"] [data-lang-content="en"] { display: block; } /* Use block for default visibility */
+        html[lang="en"] span[data-lang-content="en"] { display: inline; }
+        html[lang="en"] a[data-lang-content="en"] { display: inline; }
+
+
+        /* Active language button */
+        .lang-btn.active { background-color: #0f766e; /* cv-accent-light */ color: white; cursor: default; }
+        .dark .lang-btn.active { background-color: #5eead4; /* cv-accent-dark */ color: #1f2937; }
+        /* Ensure list items take space */
+        nav ul li { display: inline-block; }
+        /* Theme transition class */
+        .theme-transition { transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+        /* Skill item styling */
+        .skill-item { display: inline-block; margin-right: 0.75rem; margin-bottom: 0.5rem; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.875rem; }
+
+        /* --- SPA Section Styling --- */
+        /* Hide all sections by default using display: none */
+        .content-section { display: none; }
+        /* Show the active section using display: block */
+        .content-section.active-section { display: block; }
+
+    </style>
+</head>
+<body class="bg-cv-bg-light dark:bg-cv-bg-dark font-sans text-cv-text-light dark:text-cv-text-dark antialiased">
+
+    <!-- Theme Toggle Button -->
+    <button id="theme-toggle" type="button" class="fixed top-4 right-4 z-50 p-2.5 text-cv-text-light dark:text-yellow-300 bg-cv-card-bg-light dark:bg-cv-card-bg-dark rounded-lg shadow-md hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300 dark:focus:ring-gray-500 text-sm theme-transition">
+        <svg id="theme-toggle-light-icon" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5h2.25a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.166 7.758a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591z"></path></svg>
+        <svg id="theme-toggle-dark-icon" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+    </button>
+    <!-- End Theme Toggle Button -->
+
+    <div class="container mx-auto max-w-4xl p-6 md:p-10 bg-cv-card-bg-light dark:bg-cv-card-bg-dark rounded-lg shadow-md my-10 relative theme-transition">
+
+        <!-- Language Switcher -->
+        <div class="absolute top-4 left-4 flex space-x-1 border border-cv-border-light dark:border-cv-border-dark rounded-md p-0.5">
+            <button id="lang-en-btn" data-lang="en" class="lang-btn px-2 py-1 text-xs font-medium rounded-md text-cv-text-light dark:text-cv-text-dark hover:bg-gray-100 dark:hover:bg-gray-600 theme-transition">English</button>
+            <button id="lang-hu-btn" data-lang="hu" class="lang-btn px-2 py-1 text-xs font-medium rounded-md text-cv-text-light dark:text-cv-text-dark hover:bg-gray-100 dark:hover:bg-gray-600 theme-transition">Magyar</button>
+        </div>
+        <!-- End Language Switcher -->
+
+        <!-- Header Section -->
+        <header class="text-center mb-6 pt-12 md:pt-6 pb-4 border-b border-cv-border-light dark:border-cv-border-dark theme-transition">
+             <div class="mb-4 flex justify-center">
+                 <img src="profile.jpg" alt="Levente Tarsoly's Profile Picture" onerror="this.src='https://placehold.co/160x160/E2E8F0/4A5568?text=LT'; this.onerror=null;" class="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-cv-accent-light dark:border-cv-accent-dark shadow-lg theme-transition">
+             </div>
+            <h1 class="text-4xl md:text-5xl font-bold text-cv-heading-light dark:text-cv-heading-dark mb-2 theme-transition">
+                <span data-lang-content="en">Levente Tarsoly</span>
+                <span data-lang-content="hu">Tarsoly Levente</span>
+            </h1>
+            <p class="text-lg text-cv-subtle-text-light dark:text-cv-subtle-text-dark theme-transition">
+                <span data-lang-content="en">Data Scientist / Software Developer</span>
+                <span data-lang-content="hu">Adatelemző / Szoftverfejlesztő</span>
+            </p>
+            <div class="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-1 text-sm text-cv-subtle-text-light dark:text-cv-subtle-text-dark theme-transition">
+                <a href="mailto:tarsoly.levente03@gmail.com" class="hover:text-cv-accent-light dark:hover:text-cv-accent-dark theme-transition">tarsoly.levente03@gmail.com</a>
+                <span class="hidden md:inline">|</span> <span>+36 70 246 8236</span> <span class="hidden md:inline">|</span>
+                <span><span data-lang-content="en">Budapest, Hungary</span><span data-lang-content="hu">Budapest, Hungary</span></span>
+                <span class="hidden md:inline">|</span> <a href="https://github.com/TarsolyLevente" class="text-cv-accent-light dark:text-cv-accent-dark hover:underline theme-transition">GitHub</a>
+                <span class="hidden md:inline">|</span> <a href="https://www.linkedin.com/in/levente-tarsoly" class="text-cv-accent-light dark:text-cv-accent-dark hover:underline theme-transition">LinkedIn</a>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav id="main-nav" class="mb-8 border-b border-cv-border-light dark:border-cv-border-dark pb-4 theme-transition">
+            <ul class="flex flex-wrap justify-center space-x-4 md:space-x-6">
+                <li><a href="#summary" class="nav-link no-underline text-cv-text-light hover:text-cv-accent-light dark:text-cv-text-dark dark:hover:text-cv-accent-dark pb-1 theme-transition"><span data-lang-content="en">Summary</span><span data-lang-content="hu">Profil</span></a></li>
+                <li><a href="#experience" class="nav-link no-underline text-cv-text-light hover:text-cv-accent-light dark:text-cv-text-dark dark:hover:text-cv-accent-dark pb-1 theme-transition"><span data-lang-content="en">Experience</span><span data-lang-content="hu">Tapasztalat</span></a></li>
+                <li><a href="#projects" class="nav-link no-underline text-cv-text-light hover:text-cv-accent-light dark:text-cv-text-dark dark:hover:text-cv-accent-dark pb-1 theme-transition"><span data-lang-content="en">Projects</span><span data-lang-content="hu">Projektek</span></a></li>
+                <li><a href="#skills" class="nav-link no-underline text-cv-text-light hover:text-cv-accent-light dark:text-cv-text-dark dark:hover:text-cv-accent-dark pb-1 theme-transition"><span data-lang-content="en">Skills & Education</span><span data-lang-content="hu">Készségek & Végzettség</span></a></li>
+                <li><a href="#contact" class="nav-link no-underline text-cv-text-light hover:text-cv-accent-light dark:text-cv-text-dark dark:hover:text-cv-accent-dark pb-1 theme-transition"><span data-lang-content="en">Contact</span><span data-lang-content="hu">Kapcsolat</span></a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content Area - All sections included -->
+        <main>
+
+            <!-- Summary Section -->
+            <section id="summary-section" class="content-section mb-8">
+                 <div data-lang-content="en">
+                     <h2 class="text-2xl font-semibold text-cv-accent-light dark:text-cv-accent-dark mb-3 border-b border-cv-border-light dark:border-cv-border-dark pb-2 theme-transition">Profile</h2>
+                     <p class="text-cv-text-light dark:text-cv-text-dark leading-relaxed theme-transition">
+                         I am a fourth-year student specializing in Data Analysis with Deep Learning Methods at Budapest University of Technology and Economics. While deeply engaged in the world of data and AI, I am also passionate about software development, with a particular interest in backend development.
+                     </p>
+                 </div>
+                 <div data-lang-content="hu">
+                     <h2 class="text-2xl font-semibold text-cv-accent-light dark:text-cv-accent-dark mb-3 border-b border-cv-border-light dark:border-cv-border-dark pb-2 theme-transition">Profil</h2>
+                     <p class="text-cv-text-light dark:text-cv-text-dark leading-relaxed theme-transition">
+                         Negyedéves hallgató vagyok a Budapesti Műszaki és Gazdaságtudományi Egyetemen, Adatelemzés mélytanulási módszerekkel szakirányon. Bár az adattudomány és a mesterséges intelligencia világa mélyen foglalkoztat, a szoftverfejlesztés, különösen a backend-fejlesztés is mindig közel állt hozzám.
+                     </p>
+                 </div>
+             </section>
+
+            <!-- Experience Section -->
+            <section id="experience-section" class="content-section mb-8">
+                <div data-lang-content="en"><h2 class="text-2xl font-semibold text-cv-accent-light dark:text-cv-accent-dark mb-4 border-b border-cv-border-light dark:border-cv-border-dark pb-2 theme-transition">Employment History</h2></div>
+                <div data-lang-content="hu"><h2 class="text-2xl font-semibold text-cv-accent-light dark:text-cv-accent-dark mb-4 border-b border-cv-border-light dark:border-cv-border-dark pb-2 theme-transition">Szakmai Tapasztalat</h2></div>
+                <!-- Job 1 -->
+                <div class="mb-6 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg shadow-sm theme-transition">
+                    <h3 class="text-xl font-semibold text-cv-heading-light dark:text-cv-heading-dark theme-transition"><span data-lang-content="en">Junior Software Developer</span><span data-lang-content="hu">Junior Szoftverfejlesztő</span></h3>
+                    <p class="text-md font-medium text-cv-text-light dark:text-cv-text-dark theme-transition">Unisoft Group Zrt., <span data-lang-content="en">Budapest</span><span data-lang-content="hu">Budapest</span></p>
+                    <p class="text-sm text-cv-subtle-text-light dark:text-cv-subtle-text-dark mb-2 theme-transition"><span data-lang-content="en">Oct 2024 - Sep 2025</span><span data-lang-content="hu">Okt 2024 - Szept 2025</span></p>
+                    <div data-lang-content="en"><p class="text-cv-subtle-text-light dark:text-cv-subtle-text-dark text-sm italic mb-2 theme-transition">A development company creating software solutions for banks and financial institutions.</p></div>
+                    <div data-lang-content="hu"><p class="text-cv-subtle-text-light dark:text-cv-subtle-text-dark text-sm italic mb-2 theme-transition">Egy szoftverfejlesztő cég bankok és pénzügyi intézmények számára.</p></div>
+                    <ul class="list-disc list-inside text-cv-text-light dark:text-cv-text-dark space-y-1 text-sm theme-transition">
+                        <li><span data-lang-content="en">My responsibility was to migrate a JSP-based internal banking application to the Vaadin framework, enhancing its maintainability.</span><span data-lang-content="hu">Feladatom egy JSP-alapú belső banki alkalmazás migrálása volt Vaadin keretrendszerre, a karbantarthatóság javítása érdekében.</span></li>
+                        <li><span data-lang-content="en">The project required in-depth work on the backend, where I modified numerous SQL stored procedures and functions.</span><span data-lang-content="hu">A projekt backend oldali munkát is igényelt, melynek során számos SQL tárolt eljárást és függvényt módosítottam.</span></li>
+                        <li><span data-lang-content="en">I also established a suite of unit tests for quality assurance and authored technical documentation.</span><span data-lang-content="hu">Ezenkívül unit teszteket készítettem a minőségbiztosítás céljából, és műszaki dokumentációt is készítettem.</span></li>
+                    </ul>
+                </div>
+                <!-- Job 2 -->
+                <div class="mb-6 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg shadow-sm theme-transition">
+                    <h3 class="text-xl font-semibold text-cv-heading-light dark:text-cv-heading-dark theme-transition"><span data-lang-content="en">Junior Full-Stack Developer & Mobile Developer</span><span data-lang-content="hu">Junior Szoftverfejlesztő</span></h3>
+                    <p class="text-md font-medium text-cv-text-light dark:text-cv-text-dark theme-transition">RealEase Kft., <span data-lang-content="en">Budapest</span><span data-lang-content="hu">Budapest</span></p>
+                    <p class="text-sm text-cv-subtle-text-light dark:text-cv-subtle-text-dark mb-2 theme-transition"><span data-lang-content="en">Jan 2023 - Jun 2023</span><span data-lang-content="hu">Jan 2023 - Jún 2023</span></p>
+                    <div data-lang-content="en"><p class="text-cv-subtle-text-light dark:text-cv-subtle-text-dark text-sm italic mb-2 theme-transition">A specialized software development company focused on the renewable energy sector.</p></div>
+                    <div data-lang-content="hu"><p class="text-cv-subtle-text-light dark:text-cv-subtle-text-dark text-sm italic mb-2 theme-transition">Egy, a megújuló energia szektorra szakosodott szoftverfejlesztő cég.</p></div>
+                    <ul class="list-disc list-inside text-cv-text-light dark:text-cv-text-dark space-y-1 text-sm theme-transition">
+                        <li><span data-lang-content="en">I created a tool to generate CSV product data reports via a REST API.</span><span data-lang-content="hu">Fejlesztettem egy megoldást, amely REST API-n elérhető termékadatokat importálja CSV formátumba.</span></li>
+                        <li><span data-lang-content="en">I also contributed to a mobile application project for field surveys, where I was responsible for developing the user interfaces.</span><span data-lang-content="hu">Emellett közreműködtem egy helyszíni felmérésekhez készülő mobilalkmazás-projektben, ahol a felhasználói felület fejlesztéséért feleltem.</span></li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Projects Section -->
+            <section id="projects-section" class="content-section mb-8">
+                 <div data-lang-content="en"><h2 class="text-2xl font-semibold text-cv-accent-light dark:text-cv-accent-dark mb-4 border-b border-cv-border-light dark:border-cv-border-dark pb-2 theme-transition">Personal Projects</h2></div>
+                 <div data-lang-content="hu"><h2 class="text-2xl font-semibold text-cv-accent-light dark:text-cv-accent-dark mb-4 border-b border-cv-border-light dark:border-cv-border-dark pb-2 theme-transition">Személyes projektek</h2></div>
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                     <!-- Home Server Project -->
+                     <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg shadow-sm theme-transition flex flex-col">
+                        <h3 class="text-xl font-semibold text-cv-heading-light dark:text-cv-heading-dark theme-transition"><span data-lang-content="en">Home Server Setup & Administration</span><span data-lang-content="hu">Otthoni Szerver Telepítés & Adminisztráció</span></h3>
+                        <p class="text-sm text-cv-subtle-text-light dark:text-cv-subtle-text-dark mb-2 theme-transition flex-shrink-0"><span data-lang-content="en">Oct 2025 - Present</span><span data-lang-content="hu">Okt 2025 - Jelenleg</span></p>
+                        <div data-lang-content="en" class="flex-grow"><p class="text-cv-text-light dark:text-cv-text-dark text-sm theme-transition">Configured and currently maintain a home server using an old PC. Installed and manage services including Nextcloud for cloud storage, Jellyfin for media streaming, and Transmission for downloads. Set up remote access via dynamic DNS and secured services with Let's Encrypt SSL certificates. Developed a custom static HTML/CSS website for personal CV hosted on the server.</p></div>
+                        <div data-lang-content="hu" class="flex-grow"><p class="text-cv-text-light dark:text-cv-text-dark text-sm theme-transition">Egy régi számítógéppel otthoni szervert konfiguráltam és tartok karban. Telepítettem és kezelek szolgáltatásokat, többek között Nextcloudot (felhőtárhely), Jellyfint (médiastreaming) és Transmissiont (letöltések). Beállítottam a távoli elérést dinamikus DNS segítségével és a szolgáltatásokat Let's Encrypt SSL tanúsítványokkal biztosítottam. Egyedi statikus HTML/CSS weboldalt fejlesztettem a személyes önéletrajzom számára, amelyet a szerveren hosztolok.</p></div>
+                    </div>
+                    <!-- Project 1 -->
+                    <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg shadow-sm theme-transition flex flex-col">
+                        <h3 class="text-xl font-semibold text-cv-heading-light dark:text-cv-heading-dark theme-transition"><span data-lang-content="en">DDoS Attack Detection with Machine Learning</span><span data-lang-content="hu">DDoS Támadás detekció gépi tanulással</span></h3>
+                        <p class="text-sm text-cv-subtle-text-light dark:text-cv-subtle-text-dark mb-2 theme-transition flex-shrink-0"><span data-lang-content="en">Feb 2025 - Present</span><span data-lang-content="hu">Febr 2025 - Jelenleg</span></p>
+                        <div data-lang-content="en" class="flex-grow"><p class="text-cv-text-light dark:text-cv-text-dark text-sm theme-transition">This project focused on detecting DDoS attacks. I implemented various machine learning and deep learning techniques to identify malicious traffic patterns. The project also involved data preprocessing, visualization, data augmentation and feature engineering. The present performance of my model is 0.94 F1-Score for the normal traffic and 0.78 F1-Score for the DDoS.</p></div>
+                         <div data-lang-content="hu" class="flex-grow"><p class="text-cv-text-light dark:text-cv-text-dark text-sm theme-transition">Ezen projekt keretében DDoS-támadások detektálására fejlesztettem modellt. Gépi tanulást alkalmazva a modell 0,94-es F1-értéket ért el a normál forgalom, és 0,78-ast a DDoS azonosításában. Dolgoztam még adatvizualizáción, adatdúsításon és jellemzők kinyerésén is.</p></div>
+                    </div>
+                    <!-- Project 2 -->
+                    <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg shadow-sm theme-transition flex flex-col">
+                         <h3 class="text-xl font-semibold text-cv-heading-light dark:text-cv-heading-dark theme-transition"><span data-lang-content="en">Deep Learning-based Character Recognition</span><span data-lang-content="hu">Mélytanulás alapú karakterfelismerés</span></h3>
+                         <p class="text-sm text-cv-subtle-text-light dark:text-cv-subtle-text-dark mb-2 theme-transition flex-shrink-0"><span data-lang-content="en">Sep 2024 - Dec 2024 | Team Project (3 members)</span><span data-lang-content="hu">Szept 2024 - Dec 2024 | Csapatprojekt (3 fő)</span></p>
+                         <div data-lang-content="en" class="flex-grow"><p class="text-cv-text-light dark:text-cv-text-dark text-sm theme-transition">In a 3-person team, we developed a character recognition system utilizing deep learning methodologies. I created a development environment for experimenting with different models on GPU, and fine-tuned our final model. The final performance of our model was 0.81 F1 macro-average and 0.84 Accuracy.</p></div>
+                          <div data-lang-content="hu" class="flex-grow"><p class="text-cv-text-light dark:text-cv-text-dark text-sm theme-transition">Háromfős csapat tagjaként részt vettem egy mélytanuláson alapuló karakterfelismerő rendszer fejlesztésében. Létrehoztam egy környezetet, ahol kísérletezhettünk a modelleken GPUn és a meglévő modellünk finomhangolásával foglalkoztam. 0,813-as F1 makro-átlagot és 0,845-ös pontosságot ért el.</p></div>
+                     </div>
+                    <!-- Project 3 -->
+                    <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg shadow-sm theme-transition flex flex-col">
+                         <h3 class="text-xl font-semibold text-cv-heading-light dark:text-cv-heading-dark theme-transition"><span data-lang-content="en">Java Game Development</span><span data-lang-content="hu">Java Játék Fejlesztés</span></h3>
+                         <p class="text-sm text-cv-subtle-text-light dark:text-cv-subtle-text-dark mb-2 theme-transition flex-shrink-0"><span data-lang-content="en">Jan 2024 - Jun 2024 | Team Project (5 members)</span><span data-lang-content="hu">Jan 2024 - Jún 2024 | Csapatprojekt (5 fő)</span></p>
+                         <div data-lang-content="en" class="flex-grow"><p class="text-cv-text-light dark:text-cv-text-dark text-sm theme-transition">As part of a 5-member team, I contributed to the development of a Java-based game based on specifications. I focused mostly on modeling the business logic and implementing it during our collaborative work.</p></div>
+                          <div data-lang-content="hu" class="flex-grow"><p class="text-cv-text-light dark:text-cv-text-dark text-sm theme-transition">Egy 5 fős csapatban lemodelleztünk és megvalósítottunk egy játékot Java-ban egy specifikáció alapján. Legtöbbet az üzleti logika modellezésével, és annak megvalósításával foglalkoztam a közös munka során.</p></div>
+                     </div>
+                     <!-- Project 4 -->
+                    <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg shadow-sm theme-transition flex flex-col">
+                         <h3 class="text-xl font-semibold text-cv-heading-light dark:text-cv-heading-dark theme-transition"><span data-lang-content="en">Arduino weather station</span><span data-lang-content="hu">Arduino időjárás állomás</span></h3>
+                         <p class="text-sm text-cv-subtle-text-light dark:text-cv-subtle-text-dark mb-2 theme-transition flex-shrink-0"><span data-lang-content="en">Jan 2023 - Apr 2023</span><span data-lang-content="hu">Jan 2023 - Ápr 2023</span></p>
+                         <div data-lang-content="en" class="flex-grow"><p class="text-cv-text-light dark:text-cv-text-dark text-sm theme-transition">Developed an Arduino-based environmental monitoring system for a specialized terrarium to ensure optimal habitat conditions.</p></div>
+                          <div data-lang-content="hu" class="flex-grow"><p class="text-cv-text-light dark:text-cv-text-dark text-sm theme-transition">Készítettem egy Arduino-alapú monitorozó rendszert egy speciális terrárium számára az optimális élőhelyi feltételek biztosítására.</p></div>
+                     </div>
+                 </div>
+            </section>
+
+             <!-- Skills & Education Section -->
+            <section id="skills-section" class="content-section mb-8">
+                <!-- Skills -->
+                <section class="mb-8">
+                    <div data-lang-content="en"><h2 class="text-2xl font-semibold text-cv-accent-light dark:text-cv-accent-dark mb-4 border-b border-cv-border-light dark:border-cv-border-dark pb-2 theme-transition">Skills</h2></div>
+                    <div data-lang-content="hu"><h2 class="text-2xl font-semibold text-cv-accent-light dark:text-cv-accent-dark mb-4 border-b border-cv-border-light dark:border-cv-border-dark pb-2 theme-transition">Készségek</h2></div>
+                    <div class="flex flex-wrap">
+                    <span class="skill-item bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 theme-transition">Java</span>
+                    <span class="skill-item bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 theme-transition">C#</span>
+                    <span class="skill-item bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 theme-transition">Kotlin</span>
+                    <span class="skill-item bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 theme-transition">PL/SQL</span>
+                    <span class="skill-item bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 theme-transition">Python</span>
+                    <span class="skill-item bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 theme-transition">
+                        <span data-lang-content="en">Data visualization (Matplotlib, Seaborn)</span>
+                        <span data-lang-content="hu">Adatvizualizáció (Matplotlib, Seaborn)</span>
+                    </span>
+                    <span class="skill-item bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 theme-transition">
+                         <span data-lang-content="en">Data augmentation (SMOTE)</span>
+                         <span data-lang-content="hu">Adatdúsítás (SMOTE)</span>
+                    </span>
+                    <span class="skill-item bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 theme-transition">
+                        <span data-lang-content="en">Machine Learning</span>
+                        <span data-lang-content="hu">Gépi tanulás</span>
+                    </span>
+                    <span class="skill-item bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 theme-transition">
+                        <span data-lang-content="en">Deep Learning</span>
+                        <span data-lang-content="hu">Mélytanulás</span>
+                    </span>
+                 </div>
+                </section>
+                 <!-- Languages -->
+                 <section class="mb-8">
+                    <div data-lang-content="en"><h2 class="text-2xl font-semibold text-cv-accent-light dark:text-cv-accent-dark mb-4 border-b border-cv-border-light dark:border-cv-border-dark pb-2 theme-transition">Languages</h2></div>
+                    <div data-lang-content="hu"><h2 class="text-2xl font-semibold text-cv-accent-light dark:text-cv-accent-dark mb-4 border-b border-cv-border-light dark:border-cv-border-dark pb-2 theme-transition">Nyelvek</h2></div>
+                    <ul class="space-y-1 text-cv-text-light dark:text-cv-text-dark text-sm theme-transition">
+                        <li><span data-lang-content="en">English</span><span data-lang-content="hu">Angol</span></li>
+                        <li><span data-lang-content="en">Hungarian</span><span data-lang-content="hu">Magyar</span> <span class="text-cv-subtle-text-light dark:text-cv-subtle-text-dark">(Native)</span></li>
+                    </ul>
+                 </section>
+                <!-- Education -->
+                <section class="mb-8">
+                     <div data-lang-content="en"><h2 class="text-2xl font-semibold text-cv-accent-light dark:text-cv-accent-dark mb-4 border-b border-cv-border-light dark:border-cv-border-dark pb-2 theme-transition">Education</h2></div>
+                     <div data-lang-content="hu"><h2 class="text-2xl font-semibold text-cv-accent-light dark:text-cv-accent-dark mb-4 border-b border-cv-border-light dark:border-cv-border-dark pb-2 theme-transition">Végzettség</h2></div>
+                    <!-- Education 1 -->
+                    <div class="mb-6 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg shadow-sm theme-transition">
+                         <h3 class="text-xl font-semibold text-cv-heading-light dark:text-cv-heading-dark theme-transition"><span data-lang-content="en">Computer Science BSc</span><span data-lang-content="hu">Mérnökinformatikus BSc</span></h3>
+                         <p class="text-md font-medium text-cv-text-light dark:text-cv-text-dark theme-transition"><span data-lang-content="en">Budapest University of Technology and Economics, Budapest</span><span data-lang-content="hu">Budapesti Műszaki és Gazdaságtudományi Egyetem, Budapest</span></p>
+                         <p class="text-sm text-cv-subtle-text-light dark:text-cv-subtle-text-dark mb-2 theme-transition"><span data-lang-content="en">Sep 2022 - Present</span><span data-lang-content="hu">Szept 2022 - Jelenleg</span></p>
+                         <p class="text-cv-text-light dark:text-cv-text-dark text-sm theme-transition"><span data-lang-content="en">Specialization: Data Analysis with Deep Learning Methods</span><span data-lang-content="hu">Szakirány: Adatelemzés mélytanulási módszerekkel</span></p>
+                    </div>
+                    <!-- Education 2 -->
+                    <div class="mb-6 bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg shadow-sm theme-transition">
+                         <h3 class="text-xl font-semibold text-cv-heading-light dark:text-cv-heading-dark theme-transition"><span data-lang-content="en">High School Diploma</span><span data-lang-content="hu">Érettségi</span></h3>
+                         <p class="text-md font-medium text-cv-text-light dark:text-cv-text-dark theme-transition">Jedlik Ányos Gimnázium, <span data-lang-content="en">Budapest</span><span data-lang-content="hu">Budapest</span></p>
+                         <p class="text-sm text-cv-subtle-text-light dark:text-cv-subtle-text-dark mb-2 theme-transition"><span data-lang-content="en">Sep 2014 - Jun 2022</span><span data-lang-content="hu">Szept 2014 - Jún 2022</span></p>
+                         <ul class="list-disc list-inside text-cv-text-light dark:text-cv-text-dark space-y-1 text-sm theme-transition">
+                            <li><span data-lang-content="en">Final Exam Average: 94.6%</span><span data-lang-content="hu">Érettségi Átlag: 94.6%</span></li>
+                            <li><span data-lang-content="en">IT Advanced Level: 96%</span><span data-lang-content="hu">Emelt Informatika: 96%</span></li>
+                         </ul>
+                    </div>
+                </section>
+                 <!-- Hobbies -->
+                 <section class="mb-8">
+                     <div data-lang-content="en"><h2 class="text-2xl font-semibold text-cv-accent-light dark:text-cv-accent-dark mb-4 border-b border-cv-border-light dark:border-cv-border-dark pb-2 theme-transition">Hobbies</h2></div>
+                     <div data-lang-content="hu"><h2 class="text-2xl font-semibold text-cv-accent-light dark:text-cv-accent-dark mb-4 border-b border-cv-border-light dark:border-cv-border-dark pb-2 theme-transition">Hobbik</h2></div>
+                      <p class="text-cv-text-light dark:text-cv-text-dark text-sm theme-transition"><span data-lang-content="en">Simulator racing, Martial arts, Video editing, Board games</span><span data-lang-content="hu">Szimulátor verseny, Küzdősportok, Videóvágás, Társasjátékok</span></p>
+                 </section>
+            </section>
+
+             <!-- Contact Section -->
+            <section id="contact-section" class="content-section mb-8">
+                 <div data-lang-content="en"><h2 class="text-2xl font-semibold text-cv-accent-light dark:text-cv-accent-dark mb-4 border-b border-cv-border-light dark:border-cv-border-dark pb-2 theme-transition">Contact Details</h2></div>
+                 <div data-lang-content="hu"><h2 class="text-2xl font-semibold text-cv-accent-light dark:text-cv-accent-dark mb-4 border-b border-cv-border-light dark:border-cv-border-dark pb-2 theme-transition">Kapcsolat</h2></div>
+                <div class="space-y-3 text-cv-text-light dark:text-cv-text-dark text-sm theme-transition">
+                    <p><strong><span data-lang-content="en">Email:</span><span data-lang-content="hu">Email:</span></strong> <a href="mailto:tarsoly.levente03@gmail.com" class="text-cv-accent-light dark:text-cv-accent-dark hover:underline theme-transition">tarsoly.levente03@gmail.com</a></p>
+                    <p><strong><span data-lang-content="en">Phone:</span><span data-lang-content="hu">Telefon:</span></strong> +36 70 246 8236</p>
+                    <p><strong><span data-lang-content="en">Location:</span><span data-lang-content="hu">Hely:</span></strong> <span data-lang-content="en">Budapest, Hungary</span><span data-lang-content="hu">Budapest, Hungary</span></p>
+                    <p><strong>GitHub:</strong> <a href="https://github.com/TarsolyLevente" class="text-cv-accent-light dark:text-cv-accent-dark hover:underline theme-transition">Link</a> </p>
+                    <p><strong>LinkedIn:</strong> <a href="https://www.linkedin.com/in/levente-tarsoly" class="text-cv-accent-light dark:text-cv-accent-dark hover:underline theme-transition">Link</a> <!-- Add LinkedIn Link --></p>
+                </div>
+                 <!-- Optional: Add a simple contact form if desired -->
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="text-center mt-10 pt-4 border-t border-cv-border-light dark:border-cv-border-dark text-sm text-cv-subtle-text-light dark:text-cv-subtle-text-dark theme-transition">
+            <p>
+                <span data-lang-content="en">&copy; 2025 Levente Tarsoly.</span>
+                <span data-lang-content="hu">&copy; 2025 Tarsoly Levente.</span>
+            </p>
+        </footer>
+
+    </div> <!-- End Container -->
+
+    <!-- 
+      ===============================================================
+      MERGED & FIXED JAVASCRIPT
+      ===============================================================
+    -->
+    <script>
+        // --- Dark Mode Script ---
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+        const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+        
+        function setTheme(isDark) {
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                themeToggleLightIcon.classList.remove('hidden');
+                themeToggleDarkIcon.classList.add('hidden');
+                localStorage.setItem('color-theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                themeToggleDarkIcon.classList.remove('hidden');
+                themeToggleLightIcon.classList.add('hidden');
+                localStorage.setItem('color-theme', 'light');
+            }
+        }
+
+        // Initialize icon visibility based on the anti-flicker script in <head>
+        if (document.documentElement.classList.contains('dark')) {
+            themeToggleLightIcon.classList.remove('hidden');
+            themeToggleDarkIcon.classList.add('hidden');
+        } else {
+            themeToggleDarkIcon.classList.remove('hidden');
+            themeToggleLightIcon.classList.add('hidden');
+        }
+        
+        // Add click listener for the button
+        themeToggleBtn.addEventListener('click', () => {
+            setTheme(!document.documentElement.classList.contains('dark'));
+        });
+
+
+        // --- Language and SPA Script (Merged) ---
+        // Wait for the DOM to be fully loaded before running any logic
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- Add Transition Classes (Prevents flash on load) ---
+            document.body.classList.add('theme-transition');
+            document.querySelectorAll('.theme-transition').forEach(el => el.classList.add('theme-transition'));
+
+            // --- Define ALL variables ---
+            const langEnBtn = document.getElementById('lang-en-btn');
+            const langHuBtn = document.getElementById('lang-hu-btn');
+            const langBtns = [langEnBtn, langHuBtn];
+            const pageTitles = {
+                en: {"summary": "Home", "experience": "Experience", "projects": "Projects", "skills": "Skills & Education", "contact": "Contact"},
+                hu: {"summary": "Profil", "experience": "Tapasztalat", "projects": "Projektek", "skills": "Készségek & Végzettség", "contact": "Kapcsolat"}
+            };
+            const baseTitle = "Levente Tarsoly's CV";
+            const navLinks = document.querySelectorAll('#main-nav a.nav-link');
+            const contentSections = document.querySelectorAll('.content-section');
+            const defaultSection = 'summary';
+            const validIds = ['summary', 'experience', 'projects', 'skills', 'contact'];
+
+            // --- Define ALL functions ---
+            function updatePageTitle(sectionId) {
+                 const currentLang = document.documentElement.lang || 'en';
+                 const titleSuffix = pageTitles[currentLang]?.[sectionId] || pageTitles['en'][sectionId] || pageTitles['en'][defaultSection];
+                 document.title = `${baseTitle} - ${titleSuffix}`;
+            }
+
+            function getCurrentSectionId() {
+                const hash = window.location.hash;
+                const potentialId = hash ? hash.substring(1) : defaultSection;
+                return validIds.includes(potentialId) ? potentialId : defaultSection;
+            }
+
+            function setLanguage(lang) {
+                document.documentElement.lang = lang;
+                if (lang === 'hu') {
+                    langHuBtn.classList.add('active'); langEnBtn.classList.remove('active');
+                } else {
+                    langEnBtn.classList.add('active'); langHuBtn.classList.remove('active');
+                }
+                localStorage.setItem('language', lang);
+                updatePageTitle(getCurrentSectionId()); // Now this is safe to call
+            }
+
+            function showSection(sectionIdToShow) {
+                if (!validIds.includes(sectionIdToShow)) {
+                    sectionIdToShow = defaultSection;
+                    if (window.location.hash && window.location.hash !== `#${defaultSection}`) {
+                        window.location.hash = '#' + defaultSection;
+                    }
+                }
+                contentSections.forEach(section => {
+                     section.classList.remove('active-section');
+                });
+                const targetSection = document.getElementById(sectionIdToShow + '-section');
+                if (targetSection) {
+                     targetSection.classList.add('active-section');
+                } else {
+                     document.getElementById(defaultSection + '-section').classList.add('active-section');
+                     sectionIdToShow = defaultSection;
+                }
+                navLinks.forEach(link => {
+                    link.classList.toggle('active', link.getAttribute('href') === '#' + sectionIdToShow);
+                });
+                updatePageTitle(sectionIdToShow);
+            }
+
+            // --- Attach Event Listeners ---
+            langBtns.forEach(btn => {
+                btn.addEventListener('click', () => { setLanguage(btn.getAttribute('data-lang')); });
+            });
+            window.addEventListener('hashchange', () => {
+                showSection(getCurrentSectionId());
+            });
+
+            // --- Run Initial Setup ---
+            const savedLang = localStorage.getItem('language');
+            setLanguage(savedLang || 'en'); // Set initial language
+            
+            const initialSectionId = getCurrentSectionId();
+            showSection(initialSectionId); // Show initial section
+        });
+    </script>
+
+</body>
+</html>
